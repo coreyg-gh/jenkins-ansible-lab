@@ -1,19 +1,30 @@
 pipeline {
     agent any
 
-    stages {
-        stage('Hello') {
-            steps {
-                echo 'Hello from Jenkins!'
-                sh 'whoami && hostname'
-            }
-        }
+    parameters {
+        choice(
+            name: 'ENVIRONMENT',
+            choices: ['dev', 'staging', 'prod'],
+            description: 'Target environment'
+        )
+        booleanParam(
+            name: 'DRY_RUN',
+            defaultValue: true,
+            description: 'Run in dry-run mode?'
+        )
+    }
 
-        stage('Check Tools') {
+    stages {
+        stage('Deploy') {
             steps {
-                sh 'python3 --version'
-                sh 'ansible --version'
+                echo "Deploying to: ${params.ENVIRONMENT}"
+                echo "Dry run: ${params.DRY_RUN}"
             }
         }
+    }
+
+    post {
+        success { echo 'Pipeline succeeded!' }
+        failure  { echo 'Pipeline failed!' }
     }
 }
